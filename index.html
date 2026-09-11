@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SisDik Learn — Media Ajar Interaktif Sistem Digital</title>
+<meta name="description" content="Media ajar interaktif Mata Kuliah Sistem Digital: pelajari konversi bilangan biner, oktal, desimal, dan heksadesimal secara langkah demi langkah dengan visualisasi interaktif.">
+<meta name="keywords" content="sistem digital, biner, heksadesimal, oktal, desimal, konversi bilangan, media ajar, kuliah">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Langsung ke konten</a>
+
+<!-- Mobile Hamburger -->
+<button type="button" id="railToggle" class="rail-toggle" aria-label="Buka menu minggu" aria-expanded="false">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="3" y1="6" x2="21" y2="6"></line>
+    <line x1="3" y1="12" x2="21" y2="12"></line>
+    <line x1="3" y1="18" x2="21" y2="18"></line>
+  </svg>
+</button>
+
+<!-- Overlay backdrop -->
+<div class="rail-backdrop" id="railBackdrop" hidden></div>
+
+<div class="app">
+  <!-- ===== SIDEBAR / RAIL ===== -->
+  <aside class="rail" id="rail" aria-label="Navigasi minggu perkuliahan">
+
+    <!-- Brand -->
+    <div class="rail-brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <rect x="2" y="9" width="8" height="14" rx="2" fill="var(--accent-cyan)" opacity="0.9"/>
+          <rect x="22" y="4" width="8" height="8" rx="2" fill="var(--accent-amber)" opacity="0.9"/>
+          <rect x="22" y="20" width="8" height="8" rx="2" fill="var(--accent-violet)" opacity="0.9"/>
+          <path d="M10 12H16V8H22" stroke="var(--accent-amber)" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M10 20H16V24H22" stroke="var(--accent-violet)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <p class="rail-eyebrow">Media Ajar Interaktif</p>
+        <h1>Sistem Digital</h1>
+      </div>
+    </div>
+
+    <!-- Progress Bar Global -->
+    <div class="rail-global-progress" id="railGlobalProgress">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressBarFill" style="width:0%"></div>
+      </div>
+      <p class="progress-text" id="railProgress"></p>
+    </div>
+
+    <!-- Nav -->
+    <nav class="rail-nav" id="railNav" aria-label="Daftar minggu perkuliahan"></nav>
+
+    <!-- Footer -->
+    <div class="rail-footer">
+      <button type="button" id="themeToggle" class="theme-toggle" title="Ganti tema">
+        <span class="theme-icon" id="themeIcon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+        <span id="themeLabel">Mode Terang</span>
+      </button>
+      <p class="rail-version">v1.0 · Minggu 1 tersedia</p>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main" id="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <p class="breadcrumb" id="breadcrumb">Memuat…</p>
+      </nav>
+      <div class="topbar-actions">
+        <div class="reading-time" id="readingTime" hidden>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="readingTimeText">5 menit baca</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="content" id="content">
+      <!-- Welcome screen is injected by JS on first load -->
+    </div>
+  </main>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast" aria-live="polite" hidden></div>
+
+<script src="data.js"></script>
+<script src="converter.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
