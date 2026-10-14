@@ -658,6 +658,127 @@ function renderDerived(results, binary) {
 /* ============================================================
    5) RENDER: Minggu 1 — Latihan & Kuis
    ============================================================ */
+/* ── Helper: generate step-by-step explanation for Week 1 quiz ── */
+function buildQuizExplanation(typeId, n) {
+  const bin = n.toString(2);
+  const hex = n.toString(16).toUpperCase();
+  const oct = n.toString(8);
+  const dec = n.toString(10);
+
+  if (typeId === 'dec2bin') {
+    // Division steps
+    let steps = [], q = n;
+    while (q > 0) { steps.push({ q, r: q % 2, next: Math.floor(q / 2) }); q = Math.floor(q / 2); }
+    const rows = steps.map(s =>
+      `<tr><td class="mono" style="padding:4px 10px">${s.q}</td><td style="padding:4px 10px;color:var(--text-faint)">÷ 2 = ${s.next}</td><td class="mono" style="padding:4px 10px;color:var(--accent-cyan);font-weight:700">sisa <strong>${s.r}</strong></td></tr>`
+    ).join('');
+    return `
+      <p style="margin:0 0 10px;font-size:0.88rem">Bagi <strong>${n}</strong> dengan 2 berulang kali, catat sisa bagi di setiap langkah, lalu baca dari <strong>bawah ke atas</strong>.</p>
+      <div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:0.85rem">
+        <thead><tr><th style="padding:4px 10px;color:var(--text-faint);font-weight:600;text-align:left">Dibagi</th><th style="padding:4px 10px;color:var(--text-faint);font-weight:600;text-align:left">Hasil Bagi</th><th style="padding:4px 10px;color:var(--text-faint);font-weight:600;text-align:left">Sisa ↑</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p style="margin:10px 0 0;font-size:0.88rem">Baca sisa dari bawah ke atas → <strong class="mono" style="color:var(--accent-cyan)">${bin}</strong></p>`;
+  }
+
+  if (typeId === 'bin2dec') {
+    const bits = bin.split('');
+    const n_bits = bits.length;
+    const posRows = bits.map((b, i) => {
+      const pow = n_bits - 1 - i;
+      const val = b === '1' ? Math.pow(2, pow) : 0;
+      return { b, pow, val };
+    });
+    const addStr = posRows.filter(r => r.b === '1').map(r => `${r.val}`).join(' + ');
+    const posRowsHtml = posRows.map(r =>
+      `<td class="mono" style="padding:4px 8px;text-align:center;font-weight:700;color:${r.b==='1'?'var(--accent-cyan)':'var(--text-faint)'};border:1px solid var(--line)">${r.b}</td>`
+    ).join('');
+    const powHtml = posRows.map(r =>
+      `<td style="padding:4px 8px;text-align:center;font-size:0.8rem;color:var(--text-faint);border:1px solid var(--line)">2<sup>${r.pow}</sup></td>`
+    ).join('');
+    const valHtml = posRows.map(r =>
+      `<td style="padding:4px 8px;text-align:center;color:${r.val>0?'var(--success)':'var(--text-faint)'};border:1px solid var(--line)">${r.val}</td>`
+    ).join('');
+    return `
+      <p style="margin:0 0 10px;font-size:0.88rem">Kalikan setiap bit dengan nilai posisinya (pangkat 2), mulai dari kanan (posisi 0), lalu <strong>jumlahkan semua yang bernilai 1</strong>.</p>
+      <div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:0.82rem;margin-bottom:10px">
+        <tbody>
+          <tr><th style="padding:4px 8px;text-align:left;font-size:0.78rem;color:var(--text-faint);border:1px solid var(--line)">Posisi (2ⁿ)</th>${powHtml}</tr>
+          <tr><th style="padding:4px 8px;text-align:left;font-size:0.78rem;color:var(--text-faint);border:1px solid var(--line)">Bit</th>${posRowsHtml}</tr>
+          <tr><th style="padding:4px 8px;text-align:left;font-size:0.78rem;color:var(--text-faint);border:1px solid var(--line)">Nilai</th>${valHtml}</tr>
+        </tbody>
+      </table></div>
+      <p style="margin:0;font-size:0.88rem">${addStr} = <strong style="color:var(--accent-cyan)">${dec}</strong></p>`;
+  }
+
+  
+  if (typeId === 'bin2hex') {
+    const groups = groupBits(bin, 4);
+    const hexDigits = groups.map(g => parseInt(g, 2).toString(16).toUpperCase());
+    const groupHtml = groups.map((g, i) =>
+      `<div style="text-align:center;background:var(--accent-amber-dim);border:1px solid var(--accent-amber);border-radius:8px;padding:8px 12px">
+        <div class="mono" style="font-size:0.9rem">${g}</div>
+        <div style="font-size:1.1rem">↓</div>
+        <div class="mono" style="font-weight:700;color:var(--accent-amber);font-size:1rem">${hexDigits[i]}</div>
+      </div>`
+    ).join('');
+    return `
+      <p style="margin:0 0 10px;font-size:0.88rem">Tambahkan 0 di depan jika perlu agar panjang biner kelipatan 4, lalu bagi menjadi kelompok <strong>4 bit (nibble)</strong>. Tiap kelompok = 1 digit hex.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">${groupHtml}</div>
+      <p style="margin:0;font-size:0.88rem">Gabungkan: <strong class="mono" style="color:var(--accent-amber)">${hex}</strong></p>`;
+  }
+
+  if (typeId === 'bin2oct') {
+    const groups = groupBits(bin, 3);
+    const octDigits = groups.map(g => parseInt(g, 2).toString(8));
+    const groupHtml = groups.map((g, i) =>
+      `<div style="text-align:center;background:var(--accent-violet-dim);border:1px solid var(--accent-violet);border-radius:8px;padding:8px 12px">
+        <div class="mono" style="font-size:0.9rem">${g}</div>
+        <div style="font-size:1.1rem">↓</div>
+        <div class="mono" style="font-weight:700;color:var(--accent-violet);font-size:1rem">${octDigits[i]}</div>
+      </div>`
+    ).join('');
+    return `
+      <p style="margin:0 0 10px;font-size:0.88rem">Tambahkan 0 di depan jika perlu agar panjang biner kelipatan 3, lalu bagi menjadi kelompok <strong>3 bit</strong>. Tiap kelompok = 1 digit oktal.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">${groupHtml}</div>
+      <p style="margin:0;font-size:0.88rem">Gabungkan: <strong class="mono" style="color:var(--accent-violet)">${oct}</strong></p>`;
+  }
+
+  if (typeId === 'hex2bin') {
+    const hexStr = hex;
+    const parts = hexStr.split('').map(d => HEX_TO_BIN[d]);
+    const groupHtml = hexStr.split('').map((d, i) =>
+      `<div style="text-align:center;background:var(--accent-amber-dim);border:1px solid var(--accent-amber);border-radius:8px;padding:8px 12px">
+        <div class="mono" style="font-weight:700;color:var(--accent-amber);font-size:1rem">${d}</div>
+        <div style="font-size:1.1rem">↓</div>
+        <div class="mono" style="font-size:0.9rem">${parts[i]}</div>
+      </div>`
+    ).join('');
+    return `
+      <p style="margin:0 0 10px;font-size:0.88rem">Ganti setiap digit hex dengan pola <strong>4 bit</strong>-nya, lalu sambungkan berurutan.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">${groupHtml}</div>
+      <p style="margin:0;font-size:0.88rem">Gabungkan: <strong class="mono" style="color:var(--accent-cyan)">${bin}</strong></p>`;
+  }
+
+  if (typeId === 'oct2bin') {
+    const octStr = oct;
+    const parts = octStr.split('').map(d => OCT_TO_BIN[parseInt(d)]);
+    const groupHtml = octStr.split('').map((d, i) =>
+      `<div style="text-align:center;background:var(--accent-violet-dim);border:1px solid var(--accent-violet);border-radius:8px;padding:8px 12px">
+        <div class="mono" style="font-weight:700;color:var(--accent-violet);font-size:1rem">${d}</div>
+        <div style="font-size:1.1rem">↓</div>
+        <div class="mono" style="font-size:0.9rem">${parts[i]}</div>
+      </div>`
+    ).join('');
+    return `
+      <p style="margin:0 0 10px;font-size:0.88rem">Ganti setiap digit oktal dengan pola <strong>3 bit</strong>-nya, lalu sambungkan berurutan.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">${groupHtml}</div>
+      <p style="margin:0;font-size:0.88rem">Gabungkan: <strong class="mono" style="color:var(--accent-cyan)">${bin}</strong></p>`;
+  }
+
+  return `<p>Jawaban: <strong class="mono">${n.toString()}</strong></p>`;
+}
+
 const QUIZ_TYPES = [
   {
     id: "dec2bin",
@@ -762,25 +883,38 @@ function renderWeek1Quiz(container) {
         </button>
       </div>
       <div class="quiz-feedback" id="quizFeedback" aria-live="assertive"></div>
-      <button type="button" id="quizNext" class="btn-secondary" hidden>
-        <span>Soal Berikutnya</span>
-        <span class="btn-icon-frame" style="margin-left:6px">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </span>
-      </button>
+      <div class="quiz-action-row" id="quizActionRow" style="display:none;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <button type="button" id="quizExplainBtn" class="btn-explain">
+          <span class="btn-icon-frame">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </span>
+          <span id="quizExplainLabel">Lihat Penjelasan Lengkap</span>
+        </button>
+        <button type="button" id="quizNext" class="btn-secondary">
+          <span>Soal Berikutnya</span>
+          <span class="btn-icon-frame" style="margin-left:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </button>
+      </div>
+      <div class="quiz-explanation" id="quizExplanation" hidden aria-live="polite"></div>
     </div>
   `;
 
-  const scoreEl    = container.querySelector("#quizScore");
-  const streakEl   = container.querySelector("#quizStreak");
-  const countEl    = container.querySelector("#quizCount");
-  const typeLabel  = container.querySelector("#quizTypeLabel");
-  const qEl        = container.querySelector("#quizQuestion");
-  const hintEl     = container.querySelector("#quizHintText");
-  const answerEl   = container.querySelector("#quizAnswer");
-  const checkBtn   = container.querySelector("#quizCheck");
-  const nextBtn    = container.querySelector("#quizNext");
-  const feedbackEl = container.querySelector("#quizFeedback");
+  const scoreEl      = container.querySelector("#quizScore");
+  const streakEl     = container.querySelector("#quizStreak");
+  const countEl      = container.querySelector("#quizCount");
+  const typeLabel    = container.querySelector("#quizTypeLabel");
+  const qEl          = container.querySelector("#quizQuestion");
+  const hintEl       = container.querySelector("#quizHintText");
+  const answerEl     = container.querySelector("#quizAnswer");
+  const checkBtn     = container.querySelector("#quizCheck");
+  const nextBtn      = container.querySelector("#quizNext");
+  const feedbackEl   = container.querySelector("#quizFeedback");
+  const actionRow    = container.querySelector("#quizActionRow");
+  const explainBtn   = container.querySelector("#quizExplainBtn");
+  const explainLabel = container.querySelector("#quizExplainLabel");
+  const explanationEl= container.querySelector("#quizExplanation");
 
   let score = 0, streak = 0, totalQ = 0, current = null, answered = false;
 
@@ -797,7 +931,10 @@ function renderWeek1Quiz(container) {
     answerEl.value = "";
     answerEl.disabled = false;
     checkBtn.hidden = false;
-    nextBtn.hidden = true;
+    actionRow.style.display = "none";
+    explanationEl.hidden = true;
+    explanationEl.innerHTML = "";
+    explainLabel.textContent = "Lihat Penjelasan Lengkap";
     feedbackEl.textContent = "";
     feedbackEl.className = "quiz-feedback";
     countEl.textContent = totalQ;
@@ -838,16 +975,43 @@ function renderWeek1Quiz(container) {
         <span class="feedback-icon-frame feedback-icon-frame--no">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </span>
-        <span>Belum tepat. Jawaban yang benar: ${current.type.answer(current.n)}</span>
+        <span>Belum tepat. Jawaban yang benar: <strong class="mono">${current.type.answer(current.n)}</strong> — coba lihat penjelasannya!</span>
       `;
       feedbackEl.className = "quiz-feedback quiz-feedback--no";
     }
 
     answerEl.disabled = true;
     checkBtn.hidden = true;
-    nextBtn.hidden = false;
+    actionRow.style.display = "flex";
     nextBtn.focus();
   }
+
+  explainBtn.addEventListener("click", () => {
+    const isHidden = explanationEl.hidden;
+    if (isHidden) {
+      // Build explanation content
+      const exHTML = buildQuizExplanation(current.type.id, current.n);
+      const isCorrect = normalizeAnswer(current.type.answer(current.n)) === normalizeAnswer(container.querySelector("#quizAnswer").value);
+      const headerColor = isCorrect ? "var(--success)" : "var(--accent-amber)";
+      const headerText  = isCorrect ? "Konfirmasi Cara Penyelesaian" : "Cara Menyelesaikan Soal Ini";
+      explanationEl.innerHTML = `
+        <div class="quiz-explanation-inner">
+          <div class="quiz-explanation-header" style="border-left:3px solid ${headerColor}">
+            <span class="quiz-explanation-header-icon" style="background:${headerColor}20;border:1px solid ${headerColor}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${headerColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </span>
+            <span style="font-size:0.88rem;font-weight:700;color:${headerColor}">${headerText}</span>
+          </div>
+          <div class="quiz-explanation-body">${exHTML}</div>
+        </div>`;
+      explanationEl.hidden = false;
+      explainLabel.textContent = "Sembunyikan Penjelasan";
+      explanationEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } else {
+      explanationEl.hidden = true;
+      explainLabel.textContent = "Lihat Penjelasan Lengkap";
+    }
+  });
 
   checkBtn.addEventListener("click", checkAnswer);
   answerEl.addEventListener("keydown", e => { if (e.key === "Enter") checkAnswer(); });
